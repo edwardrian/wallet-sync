@@ -13,6 +13,7 @@ dayjs.extend(utc);
 dayjs.extend(timezone);
 const { NOTION_API_URL, NOTION_VERSION, NOTION_API_KEY, SUPABASE_BUCKET } = require("./constant");
 const { validateRequiredFields, convertMontoMiddleware } = require("./validator");
+const Supabase = require("./supabase");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -207,7 +208,6 @@ app.post(
   convertMontoMiddleware,
   validateRequiredFields,
   async (req, res) => {
-    console.log("🚀 ~ req:", req.body )
     try {
       const { concepto, monto, tipo, categoria, metodo_pago, notas } = req.body;
       const foto = req.file;
@@ -215,6 +215,7 @@ app.post(
       let photoResult = null;
       let photoUrl = null;
 
+      const supabase = new Supabase();
       // Si hay foto, subirla a Supabase
       if (foto) {
         try {
@@ -224,10 +225,10 @@ app.post(
           } = require("./upload");
 
           // Crear bucket si no existe
-          await createBucketIfNotExists( SUPABASE_BUCKET );
+          await supabase.createBucketIfNotExists( SUPABASE_BUCKET );
 
           // Subir foto a Supabase
-          photoResult = await uploadPhotoToSupabase(foto, SUPABASE_BUCKET);
+          photoResult = await supabase.uploadPhotoToSupabase(foto, SUPABASE_BUCKET);
 
           if (photoResult.success) {
             photoUrl = photoResult.publicUrl;
@@ -245,6 +246,17 @@ app.post(
       } else {
         console.log("ℹ️ No se proporcionó foto, continuando sin ella");
       }
+
+      await supabase.createTransaction({
+        concepto,
+        monto,
+        tipo,
+        categoria,
+        metodo_pago,
+        photoUrl,
+        notas,
+      });
+
 
       // Crear el body de Notion (con o sin foto)
       const body = createNotionBody(
