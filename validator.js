@@ -21,6 +21,7 @@ const validateRequiredFields = [
             if (typeof value === 'string') {
                 return value.replace(',', '.');
             }
+            console.log("🚀 ~ value:", value)
             return value;
         })
         .toFloat()
