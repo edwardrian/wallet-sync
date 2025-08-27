@@ -203,18 +203,18 @@ const createNotionBody = (
 
 app.post(
   "/create",
-  upload.single("photo"),
+  upload.single("foto"),
   validateRequiredFields,
   async (req, res) => {
     try {
       const { concepto, monto, tipo, categoria, metodo_pago, notas } = req.body;
-      const photo = req.file;
+      const foto = req.file;
 
       let photoResult = null;
       let photoUrl = null;
 
       // Si hay foto, subirla a Supabase
-      if (photo) {
+      if (foto) {
         try {
           const {
             uploadPhotoToSupabase,
@@ -225,7 +225,7 @@ app.post(
           await createBucketIfNotExists( SUPABASE_BUCKET );
 
           // Subir foto a Supabase
-          photoResult = await uploadPhotoToSupabase(photo, SUPABASE_BUCKET);
+          photoResult = await uploadPhotoToSupabase(foto, SUPABASE_BUCKET);
 
           if (photoResult.success) {
             photoUrl = photoResult.publicUrl;
