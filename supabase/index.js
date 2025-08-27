@@ -16,7 +16,7 @@ class Supabase {
         category: transaction.categoria,
         payment_method: transaction.metodo_pago,
         notes: transaction.notas,
-        image_url: transaction.photo,
+        image_url: transaction.photoUrl,
         notes: transaction.notas,
       };
       const { data, error } = await this.supabase
