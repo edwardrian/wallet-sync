@@ -12,10 +12,11 @@
   "dependencies": {
     "@supabase/supabase-js": "^2.56.0",
     "axios": "^1.11.0",
-    "dayjs": "^1.11.13",
+    "dayjs": "^1.11.14",
     "dotenv": "^17.2.1",
     "express": "^5.1.0",
     "express-validator": "^7.2.1",
-    "multer": "^2.0.2"
+    "multer": "^2.0.2",
+    "timezone": "^1.0.23"
   }
 }

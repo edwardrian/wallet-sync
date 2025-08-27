@@ -1,15 +1,25 @@
 const dotenv = require("dotenv");
+dotenv.config();
+
 const express = require("express");
 const axios = require("axios").default;
 const dayjs = require("dayjs");
+const utc = require("dayjs/plugin/utc");
+const timezone = require("dayjs/plugin/timezone");
 const multer = require("multer");
+
+// Configurar plugins de dayjs para zona horaria
+dayjs.extend(utc);
+dayjs.extend(timezone);
+const { NOTION_API_URL, NOTION_VERSION, NOTION_API_KEY, SUPABASE_BUCKET } = require("./constant");
 const { validateRequiredFields } = require("./validator");
-dotenv.config();
 
 const PORT = process.env.PORT || 3000;
 const app = express();
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 
 // Configuración de multer para subida de archivos (memory storage para Supabase)
 const upload = multer({
@@ -37,7 +47,7 @@ const upload = multer({
   },
 });
 
-const url = "https://api.notion.com/v1/pages";
+const url = `${NOTION_API_URL}/v1/pages`;
 
 // Funciones para crear cada campo del body de Notion
 const createConceptoField = (concepto) => ({
@@ -56,7 +66,7 @@ const createFechaField = () => ({
   Fecha: {
     type: "date",
     date: {
-      start: dayjs().format("YYYY-MM-DD"),
+      start: dayjs().tz("America/Guayaquil").format("YYYY-MM-DD"),
       end: null,
       time_zone: null,
     },
@@ -139,7 +149,6 @@ const createNotasField = (notas) => ({
 });
 
 const createPhotoField = (photoUrl) => {
-  console.log("🚀 ~ createPhotoField ~ photoUrl:", photoUrl)
   if (!photoUrl) {
     return {}; // Retorna objeto vacío si no hay foto
   }
@@ -190,37 +199,10 @@ const createNotionBody = (
   },
 });
 
-app.post("/create", validateRequiredFields, async (req, res) => {
-  const { concepto, monto, tipo, categoria, metodo_pago, notas } = req.body;
 
-  const body = createNotionBody(
-    concepto,
-    monto,
-    tipo,
-    categoria,
-    metodo_pago,
-    notas
-  );
-
-  try {
-    const { data } = await axios.post(url, body, {
-      headers: {
-        Authorization: `Bearer ${process.env.API_KEY}`,
-        "Content-Type": "application/json",
-        "Notion-Version": "2022-06-28",
-      },
-    });
-    res
-      .status(200)
-      .json({ message: "Página creada correctamente", data: data });
-  } catch (error) {
-    console.error("Error al crear la página:", JSON.stringify(error, null, 2));
-    res.status(500).json({ error: "Error al crear la página" });
-  }
-});
 
 app.post(
-  "/v2/create",
+  "/create",
   upload.single("photo"),
   validateRequiredFields,
   async (req, res) => {
@@ -240,14 +222,13 @@ app.post(
           } = require("./upload");
 
           // Crear bucket si no existe
-          await createBucketIfNotExists("facturas");
+          await createBucketIfNotExists( SUPABASE_BUCKET );
 
           // Subir foto a Supabase
-          photoResult = await uploadPhotoToSupabase(photo, "facturas");
+          photoResult = await uploadPhotoToSupabase(photo, SUPABASE_BUCKET);
 
           if (photoResult.success) {
             photoUrl = photoResult.publicUrl;
-            console.log("✅ Foto subida exitosamente a Supabase:", photoUrl);
           } else {
             console.warn(
               "⚠️ Error al subir foto a Supabase:",
@@ -278,9 +259,9 @@ app.post(
       try {
         const { data } = await axios.post(url, body, {
           headers: {
-            Authorization: `Bearer ${process.env.API_KEY}`,
+            Authorization: `Bearer ${NOTION_API_KEY}`,
             "Content-Type": "application/json",
-            "Notion-Version": "2022-06-28",
+            "Notion-Version": NOTION_VERSION,
           },
         });
 

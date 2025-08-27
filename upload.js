@@ -1,9 +1,10 @@
 const { createClient } = require('@supabase/supabase-js');
 require('dotenv').config();
+const { SUPABASE_BUCKET, SUPABASE_URL, SUPABASE_ANON_KEY } = require("./constant");
 
 // Configuración de Supabase
-const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseUrl = SUPABASE_URL;
+const supabaseKey = SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseKey) {
     throw new Error('Faltan las variables de entorno de Supabase: SUPABASE_URL y SUPABASE_ANON_KEY');
@@ -61,7 +62,7 @@ const uploadPhotoToSupabase = async (file, bucketName = 'facturas') => {
 };
 
 // Función para crear bucket si no existe
-const createBucketIfNotExists = async (bucketName = 'facturas') => {
+const createBucketIfNotExists = async (bucketName = SUPABASE_BUCKET) => {
     try {
         // Verificar si el bucket existe
         const { data: buckets, error: listError } = await supabase.storage.listBuckets();
