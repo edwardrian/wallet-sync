@@ -16,6 +16,13 @@ const validateRequiredFields = [
             console.log('🔍 Campo monto ANTES de toFloat():', value, 'tipo:', typeof value);
             return true;
         })
+        .custom((value, { req }) => {
+            // Reemplazar coma por punto para compatibilidad con decimales
+            if (typeof value === 'string') {
+                return value.replace(',', '.');
+            }
+            return value;
+        })
         .toFloat()
         .custom((value, { req }) => {
             console.log('✅ Campo monto DESPUÉS de toFloat():', value, 'tipo:', typeof value);
