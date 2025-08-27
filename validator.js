@@ -12,6 +12,7 @@ const validateRequiredFields = [
     body('monto')
         .notEmpty()
         .withMessage('El monto es requerido')
+        .toFloat()
         .isFloat({ min: 0.01 })
         .withMessage('El monto debe ser un número mayor a 0'),
     
