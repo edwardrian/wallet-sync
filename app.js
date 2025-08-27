@@ -12,7 +12,7 @@ const multer = require("multer");
 dayjs.extend(utc);
 dayjs.extend(timezone);
 const { NOTION_API_URL, NOTION_VERSION, NOTION_API_KEY, SUPABASE_BUCKET } = require("./constant");
-const { validateRequiredFields } = require("./validator");
+const { validateRequiredFields, convertMontoMiddleware } = require("./validator");
 
 const PORT = process.env.PORT || 3000;
 const app = express();
@@ -204,6 +204,7 @@ const createNotionBody = (
 app.post(
   "/create",
   upload.single("foto"),
+  convertMontoMiddleware,
   validateRequiredFields,
   async (req, res) => {
     console.log("🚀 ~ req:", req.body )

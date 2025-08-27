@@ -1,5 +1,23 @@
 const { body, validationResult } = require('express-validator');
 
+// Middleware para convertir monto ANTES de la validación
+const convertMontoMiddleware = (req, res, next) => {
+    if (req.body.monto) {
+        console.log('🔍 ANTES de conversión:', req.body.monto, 'tipo:', typeof req.body.monto);
+        
+        // Reemplazar coma por punto y convertir a número
+        let montoStr = String(req.body.monto);
+        montoStr = montoStr.replace(',', '.');
+        const montoNum = Number(montoStr);
+        
+        console.log('✅ DESPUÉS de conversión:', montoNum, 'tipo:', typeof montoNum);
+        
+        // Actualizar el body
+        req.body.monto = montoNum;
+    }
+    next();
+};
+
 // Middleware para validar los campos requeridos
 const validateRequiredFields = [
     body('concepto')
@@ -12,23 +30,6 @@ const validateRequiredFields = [
     body('monto')
         .notEmpty()
         .withMessage('El monto es requerido')
-        .custom((value, { req }) => {
-            console.log('🔍 Campo monto ANTES de toFloat():', value, 'tipo:', typeof value);
-            return true;
-        })
-        .custom((value, { req }) => {
-            // Reemplazar coma por punto para compatibilidad con decimales
-            if (typeof value === 'string') {
-                return value.replace(',', '.');
-            }
-            console.log("🚀 ~ value:", value)
-            return value;
-        })
-        .toFloat()
-        .custom((value, { req }) => {
-            console.log('✅ Campo monto DESPUÉS de toFloat():', value, 'tipo:', typeof value);
-            return true;
-        })
         .isFloat({ min: 0.01 })
         .withMessage('El monto debe ser un número mayor a 0'),
     
@@ -74,4 +75,4 @@ const validateRequiredFields = [
     }
 ];
 
-module.exports = { validateRequiredFields };
+module.exports = { validateRequiredFields, convertMontoMiddleware };
