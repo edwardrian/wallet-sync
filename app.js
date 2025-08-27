@@ -206,6 +206,7 @@ app.post(
   upload.single("foto"),
   validateRequiredFields,
   async (req, res) => {
+    console.log("🚀 ~ req:", req.body )
     try {
       const { concepto, monto, tipo, categoria, metodo_pago, notas } = req.body;
       const foto = req.file;

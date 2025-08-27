@@ -12,7 +12,15 @@ const validateRequiredFields = [
     body('monto')
         .notEmpty()
         .withMessage('El monto es requerido')
+        .custom((value, { req }) => {
+            console.log('🔍 Campo monto ANTES de toFloat():', value, 'tipo:', typeof value);
+            return true;
+        })
         .toFloat()
+        .custom((value, { req }) => {
+            console.log('✅ Campo monto DESPUÉS de toFloat():', value, 'tipo:', typeof value);
+            return true;
+        })
         .isFloat({ min: 0.01 })
         .withMessage('El monto debe ser un número mayor a 0'),
     
